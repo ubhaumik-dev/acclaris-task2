@@ -104,4 +104,40 @@ def update_note(note:UpdateNoteRequest):
 
     existing_note = db.query(Note).filter(
         Note.id == note.id
-    )
+    ).first()
+
+    if not existing_note:
+        db.close()
+        return {"error" :"note not found"}
+    
+    existing_note.title = note.title
+    existing_note.content = note.content
+
+    db.commit()
+    db.refresh(existing_note)
+
+    db.close()
+    return{
+        "message" : "note updated successfully"
+    }
+
+#DELETE NOTES API
+
+@app.delete("/delete-note")
+def delete_note(note:DeleteNoteRequest):
+    db = SessionLocal()
+    existing_note = db.query(Note).filter(
+        Note.id == note.id
+    ).first()
+
+    if not existing_note:
+        db.close()
+        return{"error" :"note not found"}
+
+    db.delete(existing_note)
+    db.commit()
+    db.close()
+
+    return{
+        "message" : "note deleted successfully"
+    }
